@@ -48,9 +48,10 @@ export default {
   setup(props) {
     const emailSelection = useEmailSelection();
     const numberSelected = computed(() => emailSelection.emails.size);
-    const allEmailsSelected = computed(() => numberSelected.value === props.emails.length);
+    const numberEmails = computed(() => props.emails.length);
+    const allEmailsSelected = computed(() => numberSelected.value === numberEmails.value && numberEmails.value > 0);
     const someEmailsSelected = computed(() => {
-      return numberSelected.value > 0 && numberSelected.value < props.emails.length;
+      return numberSelected.value > 0 && numberSelected.value < numberEmails.value;
     });
 
     const bulkSelect = () => {

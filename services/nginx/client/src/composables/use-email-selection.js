@@ -35,10 +35,12 @@ export const useEmailSelection = () => {
   const markUnread = () => forSelected(e => {
     e.read = false;
   });
-  const archive = () => forSelected(e => {
-    e.archived = true;
+  const archive = () => {
+    forSelected(e => {
+      e.archived = true;
+    });
     clear();
-  });
+  };
 
   return {
     emails,

@@ -1,13 +1,28 @@
 <template>
-
+  <div class="btn-group float-end" role="button" aria-label="Toggle Inbox and Archive">
+    <button
+      class="btn btn-lg btn-outline-primary"
+      @click="selectScreen('inbox')"
+      :disabled="selectedScreen === 'inbox'"
+    >
+      Inbox
+    </button>
+    <button
+      class="btn btn-lg btn-outline-primary"
+      @click="selectScreen('archive')"
+      :disabled="selectedScreen === 'archive'"
+    >
+      Archive
+    </button>
+  </div>
   <table class="table mail-table">
     <tbody>
       <tr>
         <td colspan="5">
-          <bulk-action-bar :emails="unarchivedEmails" />
+          <bulk-action-bar :emails="filteredEmails" />
         </td>
       </tr>
-      <tr v-for="email in unarchivedEmails"
+      <tr v-for="email in filteredEmails"
         :key="email.id"
         :class="['clickable', email.read ? 'read' : '']"
       >
@@ -20,13 +35,16 @@
         </td>
         <td @click="openEmail(email)">{{ email.from_email }}</td>
         <td @click="openEmail(email)">
-          <p><strong>{{ email.subject }}</strong> - {{ bodySubstring(email) }}</p>
+          <p><strong>{{ subjectSubstring(email) }}</strong> - {{ bodySubstring(email) }}</p>
         </td>
         <td class="date" @click="openEmail(email)">
           {{ format(new Date(email.sent_at), 'MMMM do yyyy') }}
         </td>
-        <td>
+        <td v-if="onInboxScreen">
           <button class="btn btn-sm btn-info" @click="markEmailArchived(email)">Archive</button>
+        </td>
+        <td v-if="onArchiveScreen">
+          <button class="btn btn-sm btn-info" @click="markEmailUnarchived(email)">Inbox</button>
         </td>
       </tr>
     </tbody>
@@ -52,6 +70,9 @@ import BulkActionBar from '@/components/BulkActionBar.vue';
 import MailView from '@/components/MailView.vue';
 import ModalView from '@/components/ModalView.vue';
 
+const SUBJECT_MAX_LENGTH = 90;
+const BODY_MAX_LENGTH = 100;
+
 export default {
   async setup() {
     let modal = null;
@@ -73,7 +94,8 @@ export default {
       setModal,
       closeModal,
       "emails": ref(emails),
-      openedEmail: ref(null)
+      openedEmail: ref(null),
+      selectedScreen: ref('inbox'),
     };
   },
   components: {
@@ -82,8 +104,22 @@ export default {
     ModalView,
   },
   methods: {
+    selectScreen(newScreen) {
+      this.selectedScreen = newScreen;
+      this.emailSelection.clear();
+    },
+    subjectSubstring(email) {
+      const subject = email.subject.substring(0, SUBJECT_MAX_LENGTH);
+      if (subject.length < email.subject.length) {
+        return subject + "\u2026";
+      }
+      return subject;
+    },
     bodySubstring(email) {
-      const body = email.body.substring(0, 100 - email.subject.length);
+      if (this.subjectSubstring(email).length >= SUBJECT_MAX_LENGTH) {
+        return '';
+      }
+      const body = email.body.substring(0, BODY_MAX_LENGTH - email.subject.length);
       if (body.length < email.body.length) {
         return body + "\u2026";
       }
@@ -102,6 +138,10 @@ export default {
       email.archived = true;
       this.updateEmail(email);
     },
+    markEmailUnarchived(email) {
+      email.archived = false;
+      this.updateEmail(email);
+    },
     changeEmail({
       toggleRead,
       toggleArchive,
@@ -111,10 +151,10 @@ export default {
     }) {
       const email = this.openedEmail;
       if (toggleRead) { email.read = !email.read; }
-      if (toggleArchive) { email.archive = !email.archive; }
+      if (toggleArchive) { email.archived = !email.archived; }
       if (save) { this.updateEmail(email); }
       if (changeIndex) {
-        const emails = this.unarchivedEmails;
+        const emails = this.filteredEmails;
         const currentIndex = emails.indexOf(this.openedEmail);
         let newIndex = currentIndex + changeIndex;
         if (newIndex > emails.length - 1) {
@@ -137,9 +177,24 @@ export default {
     },
   },
   computed: {
+    filteredEmails() {
+      if (this.selectedScreen === 'inbox') {
+        return this.unarchivedEmails;
+      }
+      return this.archivedEmails;
+    },
     unarchivedEmails() {
       return this.emails.filter(e => !e.archived);
     },
+    archivedEmails() {
+      return this.emails.filter(e => e.archived);
+    },
+    onInboxScreen() {
+      return this.selectedScreen === 'inbox';
+    },
+    onArchiveScreen() {
+      return this.selectedScreen === 'archive';
+    }
   }
 };
 </script>
