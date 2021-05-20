@@ -66,11 +66,12 @@ def index():
     return jsonify(data)
 
 
-@app.route("/api/<email_id:int>", methods=['GET'])
+@app.route("/api/<email_id>", methods=['GET'])
 def email(email_id):
     return jsonify(Email.query.get_or_404(email_id).to_dict())
 
-@app.route("/api/<email_id:int>", methods=["PUT"])
+
+@app.route("/api/<email_id>", methods=["PUT"])
 def update_email(email_id):
     email = Email.query.get_or_404(email_id)
     data = request.get_jon() or {}
