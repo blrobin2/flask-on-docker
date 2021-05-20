@@ -1,12 +1,41 @@
 <template>
-  <div>
-    <input
-      type="checkbox"
-      :checked="allEmailsSelected"
-      :indeterminate="someEmailsSelected"
-      class="form-check-input"
-      @click="bulkSelect"
-    />
+  <div class="bulk-action-bar">
+    <span>
+      <input
+        id="select-all-emails"
+        name="select-all-emails"
+        type="checkbox"
+        :checked="allEmailsSelected"
+        :indeterminate="someEmailsSelected"
+        class="form-check-input"
+        @click="bulkSelect"
+      />
+      <label class="visually-hidden" for="select-all-emails">Select All</label>
+    </span>
+    &nbsp;
+    <span class="btn-group" role="button" aria-label="Bulk Actions">
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        @click="emailSelection.markRead"
+        :disabled="[...emailSelection.emails].every(e => e.read)"
+      >
+        Mark Read
+      </button>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        @click="emailSelection.markUnread"
+        :disabled="[...emailSelection.emails].every(e => !e.read)"
+      >
+        Mark Unread
+      </button>
+      <button
+        class="btn btn-sm btn-outline-secondary"
+        @click="emailSelection.archive"
+        :disabled="numberSelected === 0"
+      >
+        Archive
+      </button>
+    </span>
   </div>
 </template>
 
@@ -36,6 +65,8 @@ export default {
       allEmailsSelected,
       someEmailsSelected,
       bulkSelect,
+      emailSelection,
+      numberSelected,
     };
   },
   props: {

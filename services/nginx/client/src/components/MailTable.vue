@@ -1,7 +1,12 @@
 <template>
-  <bulk-action-bar :emails="unarchivedEmails" />
+
   <table class="table mail-table">
     <tbody>
+      <tr>
+        <td colspan="5">
+          <bulk-action-bar :emails="unarchivedEmails" />
+        </td>
+      </tr>
       <tr v-for="email in unarchivedEmails"
         :key="email.id"
         :class="['clickable', email.read ? 'read' : '']"

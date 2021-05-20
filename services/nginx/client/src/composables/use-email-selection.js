@@ -1,5 +1,7 @@
 import { reactive } from 'vue';
 
+import { updateEmail } from '@/services/emailService';
+
 const emails = reactive(new Set());
 export const useEmailSelection = () => {
   const toggle = (email) => {
@@ -20,11 +22,32 @@ export const useEmailSelection = () => {
     });
   };
 
+  const forSelected = fn => {
+    emails.forEach(email => {
+      fn(email);
+      updateEmail(email.id, email);
+    });
+  };
+
+  const markRead = () => forSelected(e => {
+    e.read = true;
+  });
+  const markUnread = () => forSelected(e => {
+    e.read = false;
+  });
+  const archive = () => forSelected(e => {
+    e.archived = true;
+    clear();
+  });
+
   return {
     emails,
     toggle,
     clear,
     addMultiple,
+    markRead,
+    markUnread,
+    archive,
   };
 };
 
