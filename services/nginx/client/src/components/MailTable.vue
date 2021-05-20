@@ -24,7 +24,7 @@
       </tr>
       <tr v-for="email in filteredEmails"
         :key="email.id"
-        :class="['clickable', email.read ? 'read' : '']"
+        :class="[email.read ? 'read' : '', emailSelection.emails.has(email) ? 'table-primary' : '']"
       >
         <td scope="row">
           <input type="checkbox"
@@ -33,11 +33,11 @@
             class="form-check-input"
           />
         </td>
-        <td @click="openEmail(email)">{{ email.from_email }}</td>
-        <td @click="openEmail(email)">
+        <td>{{ email.from_email }}</td>
+        <td class="clickable" @click="openEmail(email)">
           <p><strong>{{ subjectSubstring(email) }}</strong> - {{ bodySubstring(email) }}</p>
         </td>
-        <td class="date" @click="openEmail(email)">
+        <td class="clickable date" @click="openEmail(email)">
           {{ format(new Date(email.sent_at), 'MMMM do yyyy') }}
         </td>
         <td v-if="onInboxScreen">
