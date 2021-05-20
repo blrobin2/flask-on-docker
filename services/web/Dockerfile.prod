@@ -1,8 +1,8 @@
-#################
-# FLASK BUILDER #
-#################
+###########
+# BUILDER #
+###########
 
-FROM python:3.9.5-slim-buster as build-flask
+FROM python:3.9.5-slim-buster as builder
 
 WORKDIR /usr/src/app
 
@@ -37,8 +37,8 @@ RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
 RUN apt-get update && apt-get install -y --no-install-recommends netcat
-COPY --from=build-flask /usr/src/app/wheels /wheels
-COPY --from=build-flask /usr/src/app/requirements.txt .
+COPY --from=builder /usr/src/app/wheels /wheels
+COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install --no-cache /wheels/*
 
