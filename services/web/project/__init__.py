@@ -1,11 +1,8 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
-from flask.helpers import send_from_directory, url_for
+from flask.helpers import url_for
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.utils import secure_filename
-
-import os
 
 
 app = Flask(__name__)
@@ -74,7 +71,7 @@ def email(email_id):
 @app.route("/api/<email_id>", methods=["PUT"])
 def update_email(email_id):
     email = Email.query.get_or_404(email_id)
-    data = request.get_jon() or {}
+    data = request.get_json() or {}
     email.from_dict(data)
     db.session.commit()
     return jsonify(email.to_dict())

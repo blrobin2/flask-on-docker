@@ -26,7 +26,7 @@
 import { format } from 'date-fns';
 import { ref } from 'vue';
 
-import { getEmails } from '../services/emailService';
+import { getEmails, updateEmail } from '../services/emailService';
 
 export default {
   async setup() {
@@ -39,18 +39,19 @@ export default {
   methods: {
     markEmailRead(email) {
       email.read = true;
-      // updateEmail(email.id, {
-      //   read: true
-      // }).then(res => {
-      //   console.log(res);
-      //   this.getEmails();
-      // }).catch(err => {
-      //   console.error(err);
-      // });
+      this.updateEmail(email);
     },
     markEmailArchived(email) {
       email.archived = true;
+      this.updateEmail(email);
     },
+    updateEmail(email) {
+      updateEmail(email.id, email).then(res => {
+        console.log(res);
+      }).catch(err => {
+        console.error(err);
+      });
+    }
   },
   computed: {
     unarchivedEmails() {

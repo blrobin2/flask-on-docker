@@ -9,8 +9,8 @@ export async function updateEmail(id, data) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      body: JSON.stringify(data)
-    }
+    },
+    body: JSON.stringify(data)
   });
   return await response.json();
 }
