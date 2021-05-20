@@ -1,4 +1,5 @@
 <template>
+  <bulk-action-bar :emails="unarchivedEmails" />
   <table class="table mail-table">
     <tbody>
       <tr v-for="email in unarchivedEmails"
@@ -8,7 +9,8 @@
         <td scope="row">
           <input type="checkbox"
             @click="emailSelection.toggle(email)"
-            :selected="emailSelection.emails.has(email)"
+            :checked="emailSelection.emails.has(email)"
+            class="form-check-input"
           />
         </td>
         <td @click="openEmail(email)">{{ email.from_email }}</td>
@@ -41,6 +43,7 @@ import { ref } from 'vue';
 
 import { getEmails, updateEmail } from '@/services/emailService';
 import useEmailSelection from '@/composables/use-email-selection';
+import BulkActionBar from '@/components/BulkActionBar.vue';
 import MailView from '@/components/MailView.vue';
 import ModalView from '@/components/ModalView.vue';
 
@@ -69,6 +72,7 @@ export default {
     };
   },
   components: {
+    BulkActionBar,
     MailView,
     ModalView,
   },
