@@ -21,17 +21,20 @@ import useKeydown from '../composables/use-keydown';
 
 export default {
   setup(props, { emit }) {
-    const toggleRead = () => {
-      emit('toggleRead', props.email);
-    };
-
-    const toggleArchive = () => {
-      emit('toggleArchive', props.email);
-    };
+    const toggleRead = () => { emit('changeEmail', { toggleRead: true, save: true }); };
+    const toggleArchive = () => { emit('changeEmail', { toggleArchive: true, save: true, closeModal: true }); };
+    const goNewer = () => { emit('changeEmail', { changeIndex: -1 }); };
+    const goOlder = () => { emit('changeEmail', { changeIndex: 1 }); };
+    const goNewerAndArchive = () => { emit('changeEmail', { changeIndex: -1, toggleArchive: true, save: true }); };
+    const goOlderAndArchive = () => { emit('changeEmail', { changeIndex: 1, toggleArchive: true, save: true }); };
 
     useKeydown([
       { key: 'r', fn: toggleRead },
       { key: 'e', fn: toggleArchive },
+      { key: 'k', fn: goNewer },
+      { key: 'j', fn: goOlder },
+      { key: '[', fn: goNewerAndArchive },
+      { key: ']', fn: goOlderAndArchive },
     ]);
 
     return {
@@ -39,6 +42,8 @@ export default {
       marked,
       toggleRead,
       toggleArchive,
+      goOlder,
+      goNewer,
     };
   },
   props: {

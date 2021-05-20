@@ -25,10 +25,7 @@
       <h2 class="mb-0">Subject: <strong>{{ openedEmail.subject }}</strong></h2>
     </template>
     <template v-slot:default>
-      <mail-view :email="openedEmail"
-        @toggleArchive="toggleArchive"
-        @toggleRead="toggleRead"
-      />
+      <mail-view :email="openedEmail" @changeEmail="changeEmail" />
     </template>
   </modal-view>
 </template>
@@ -83,21 +80,36 @@ export default {
       email.archived = true;
       this.updateEmail(email);
     },
-    toggleRead(email) {
-      email.read = !email.read;
-      this.updateEmail(email);
-    },
-    toggleArchive(email) {
-      email.archived = !email.archived;
-      this.updateEmail(email);
-    },
-    updateEmail(email) {
-      if (this.openedEmail) {
+    changeEmail({
+      toggleRead,
+      toggleArchive,
+      save,
+      closeModal,
+      changeIndex
+    }) {
+      const email = this.openedEmail;
+      if (toggleRead) { email.read = !email.read; }
+      if (toggleArchive) { email.archive = !email.archive; }
+      if (save) { this.updateEmail(email); }
+      if (changeIndex) {
+        const emails = this.unarchivedEmails;
+        const currentIndex = emails.indexOf(this.openedEmail);
+        let newIndex = currentIndex + changeIndex;
+        if (newIndex > emails.length - 1) {
+          newIndex = 0;
+        }
+        if (newIndex < 0) {
+          newIndex = emails.length - 1;
+        }
+        const newEmail = emails[newIndex];
+        this.openEmail(newEmail);
+      }
+      if (closeModal) {
         this.closeEmail();
       }
-      updateEmail(email.id, email).then(() => {
-        // console.log(res);
-      }).catch(err => {
+    },
+    updateEmail(email) {
+      updateEmail(email.id, email).catch(err => {
         console.error(err);
       });
     },
