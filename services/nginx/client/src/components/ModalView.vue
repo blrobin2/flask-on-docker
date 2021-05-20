@@ -21,7 +21,7 @@
 export default {
   setup(_props, { emit }) {
     return {
-      emit
+      emit,
     };
   },
 };

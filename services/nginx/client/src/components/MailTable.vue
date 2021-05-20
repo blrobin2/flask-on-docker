@@ -25,7 +25,10 @@
       <h2 class="mb-0">Subject: <strong>{{ openedEmail.subject }}</strong></h2>
     </template>
     <template v-slot:default>
-      <mail-view :email="openedEmail" />
+      <mail-view :email="openedEmail"
+        @toggleArchive="toggleArchive"
+        @toggleRead="toggleRead"
+      />
     </template>
   </modal-view>
 </template>
@@ -80,7 +83,18 @@ export default {
       email.archived = true;
       this.updateEmail(email);
     },
+    toggleRead(email) {
+      email.read = !email.read;
+      this.updateEmail(email);
+    },
+    toggleArchive(email) {
+      email.archived = !email.archived;
+      this.updateEmail(email);
+    },
     updateEmail(email) {
+      if (this.openedEmail) {
+        this.closeEmail();
+      }
       updateEmail(email.id, email).then(() => {
         // console.log(res);
       }).catch(err => {
