@@ -1,6 +1,7 @@
 export async function getEmails() {
   const response = await fetch('/api');
-  return await response.json();
+  const json = await response.json();
+  return json.items;
 }
 
 export async function updateEmail(id, data) {
