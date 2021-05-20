@@ -1,17 +1,22 @@
 <template>
+  <h3>{{ emailSelection.emails.size }} emails selected</h3>
   <table class="table mail-table">
     <tbody>
       <tr v-for="email in unarchivedEmails"
         :key="email.id"
         :class="['clickable', email.read ? 'read' : '']"
-        @click="openEmail(email)"
       >
-        <td scope="row"><input type="checkbox" /></td>
-        <td>{{ email.from_email }}</td>
-        <td class="overflow-hidden">
-          <p><strong>{{ email.subject }}</strong> - {{ email.body }}</p>
+        <td scope="row">
+          <input type="checkbox"
+            @click="emailSelection.toggle(email)"
+            :selected="emailSelection.emails.has(email)"
+          />
         </td>
-        <td class="date">
+        <td @click="openEmail(email)">{{ email.from_email }}</td>
+        <td @click="openEmail(email)">
+          <p><strong>{{ email.subject }}</strong> - {{ bodySubstring(email) }}</p>
+        </td>
+        <td class="date" @click="openEmail(email)">
           {{ format(new Date(email.sent_at), 'MMMM do yyyy') }}
         </td>
         <td>
@@ -33,7 +38,7 @@
 <script>
 import { Modal } from 'bootstrap';
 import { format } from 'date-fns';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 
 import { getEmails, updateEmail } from '../services/emailService';
 import MailView from './MailView.vue';
@@ -53,8 +58,21 @@ export default {
       modal = null;
     };
 
+    const selected = reactive(new Set());
+    const emailSelection = {
+      emails: selected,
+      toggle(email) {
+        if (selected.has(email)) {
+          selected.delete(email);
+        } else {
+          selected.add(email);
+        }
+      }
+    }
+
     const emails = await getEmails();
     return {
+      emailSelection,
       format,
       setModal,
       closeModal,
@@ -67,6 +85,13 @@ export default {
     ModalView,
   },
   methods: {
+    bodySubstring(email) {
+      const body = email.body.substring(0, 100 - email.subject.length);
+      if (body.length < email.body.length) {
+        return body + "\u2026";
+      }
+      return body;
+    },
     openEmail(email) {
       email.read = true;
       this.updateEmail(email);
