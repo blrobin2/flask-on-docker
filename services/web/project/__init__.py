@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
-from flask.helpers import send_from_directory
+from flask.helpers import send_from_directory, url_for
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
@@ -33,7 +33,47 @@ class Email(db.Model):
         if sent_at is not None:
             self.sent_at = sent_at
 
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            from_email=self.from_email,
+            subject=self.subject,
+            body=self.body,
+            sent_at=self.sent_at.isoformat() + 'Z',
+            archived=self.archived,
+            read=self.read,
+            _links=dict(
+                self=url_for('email', email_id=self.id)
+            )
+        )
+
+    def from_dict(self, data):
+        for field in ['archived', 'read']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    @staticmethod
+    def to_collection(query):
+        return dict(
+            items=[item.to_dict() for item in query]
+        )
+
 
 @app.route("/api")
 def index():
-    return jsonify(hello="world")
+    emails = Email.query.order_by(Email.sent_at.desc()).all()
+    data = Email.to_collection(emails)
+    return jsonify(data)
+
+
+@app.route("/api/<email_id:int>", methods=['GET'])
+def email(email_id):
+    return jsonify(Email.query.get_or_404(email_id).to_dict())
+
+@app.route("/api/<email_id:int>", methods=["PUT"])
+def update_email(email_id):
+    email = Email.query.get_or_404(email_id)
+    data = request.get_jon() or {}
+    email.from_dict(data)
+    db.session.commit()
+    return jsonify(email.to_dict())
