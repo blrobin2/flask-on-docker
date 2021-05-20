@@ -31,46 +31,9 @@ class Email(db.Model):
         self.subject = subject
         self.body = body
         if sent_at is not None:
-            self.sent_at = sent_at 
+            self.sent_at = sent_at
 
 
-@app.route("/")
-def hello_world():
+@app.route("/api")
+def index():
     return jsonify(hello="world")
-
-
-@app.route("/static/<path:filename>")
-def staticfiles(filename):
-    return send_from_directory(app.config["STATIC_FOLDER"], filename)
-
-
-@app.route("/media/<path:filename>")
-def mediafiles(filename):
-    return send_from_directory(app.config["MEDIA_FOLDER"], filename)
-
-
-@app.route("/upload", methods=["GET", "POST"])
-def upload_file():
-    if request.method == "POST":
-        file = request.files["file"]
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["MEDIA_FOLDER"], filename))
-    return """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Upload New File</title>
-    </head>
-    <body>
-        <form action="" method="post" enctype="multipart/form-data">
-            <p>
-                <input type="file" name="file" />
-                <input type="submit" value="Upload" />
-            </p>
-        </form>
-    </body>
-    </html>
-    """
