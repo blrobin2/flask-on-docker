@@ -18,33 +18,53 @@
           <button class="btn btn-sm btn-info" @click="markEmailArchived(email)">Archive</button>
         </td>
       </tr>
-      <tr v-if="openedEmail">
-        <td colspan="5">
-          <mail-view :email="openedEmail" />
-        </td>
-      </tr>
     </tbody>
   </table>
+  <modal-view @closeModal="closeEmail" :ref="setModal" v-if="openedEmail">
+    <template v-slot:header>
+      <h2 class="mb-0">Subject: <strong>{{ openedEmail.subject }}</strong></h2>
+    </template>
+    <template v-slot:default>
+      <mail-view :email="openedEmail" />
+    </template>
+  </modal-view>
 </template>
 
 <script>
+import { Modal } from 'bootstrap';
 import { format } from 'date-fns';
 import { ref } from 'vue';
 
 import { getEmails, updateEmail } from '../services/emailService';
 import MailView from './MailView.vue';
+import ModalView from './ModalView.vue';
 
 export default {
   async setup() {
+    let modal = null;
+    const setModal = el => {
+      if (el) {
+        modal = new Modal(el.$el);
+        modal.show();
+      }
+    };
+    const closeModal = () => {
+      modal.hide();
+      modal = null;
+    };
+
     const emails = await getEmails();
     return {
       format,
+      setModal,
+      closeModal,
       "emails": ref(emails),
       openedEmail: ref(null)
     };
   },
   components: {
     MailView,
+    ModalView,
   },
   methods: {
     openEmail(email) {
@@ -52,13 +72,17 @@ export default {
       this.updateEmail(email);
       this.openedEmail = email;
     },
+    closeEmail() {
+      this.closeModal();
+      this.openedEmail = null;
+    },
     markEmailArchived(email) {
       email.archived = true;
       this.updateEmail(email);
     },
     updateEmail(email) {
-      updateEmail(email.id, email).then(res => {
-        console.log(res);
+      updateEmail(email.id, email).then(() => {
+        // console.log(res);
       }).catch(err => {
         console.error(err);
       });
@@ -73,6 +97,9 @@ export default {
 </script>
 
 <style scoped>
+  .clickable {
+    cursor: pointer;
+  }
   .read {
     opacity: 0.5;
   }
